@@ -5,7 +5,7 @@ Instructions for use:
   2. Install the required packages:
      a. Locate the "Console" pane in RStudio. It's usually in the bottom left corner.
      b. In that pane, at the prompt that looks like ">", type or paste this command - 
-        install.packages(c("shiny", "shinyjs", "shinyalert", "readxl", "rmarkdown", "knitr", "kableExtra", "png", dplyr", "mailR", "futile.logger", "properties"))
+        install.packages(c("shiny", "shinyjs", "shinyalert", "readxl", "rmarkdown", "knitr", "kableExtra", "png", "dplyr", "mailR", "futile.logger", "properties"))
      c. Press Enter. This will take a few seconds. You should see several messages telling you that a certain package has been successfully unpacked etc. The last message should say something like -
        The downloaded binary packages are in
           C:\...\downloaded_packages.
@@ -41,20 +41,32 @@ Instructions for use:
   
   
   6. Close and then restart RStudio.
-Steps 2 through 6 need to be executed only once.
+  
+  
+  7. After opening RStudio, in the console pane type this at the ">" prompt and press Enter:
+     a. Sys.getenv()
+     b. This should show a list of environmental variables such as "HOME". In that list, try to find a variable called "JAVA_HOME".
+     c. If you can't find it, you'll have to set it to the folder where Java is installed, by typing something like this at the ">" prompt in the Console pane and pressing Enter:
+        I. Sys.setenv(JAVA_HOME='C:\\Program Files\\Java\\jdk1.8.0_181')
+           Here the value after "JAVA_HOME=" is the path to the Java installation. If you installed Java in Step 5, make sure that it's the same as the value shown in step 5.c.VIII. 
+           Please note the two slashes ("\\") instead of one. Also make sure that the version of JDK (the value after "Java\\") is the same as the one on your computer.
+           The version is the name of the folder under the one where Java is installed.
+       II. Close and then restart RStudio.
 
-  7. If "app.R" from this folder isn't open in RStudio:
+Steps 2 through 7 need to be executed only once.
+
+  8. If "app.R" from this folder isn't open in RStudio:
      a. Go to the File menu.
      b. Select "Open File...".
      c. Choose that file from this folder.
   
   
-  8. Run the app:
+  9. Run the app:
      a. With "app.R" open, click on "Run App". It should be a button towards the top right corner of the tab that is showing the file.
      b. This should pop up a window that shows the user interface(UI).
   
   
-  9. Use the app:
+  10. Use the app:
      a. Upload the Excel (.xslx) file containing facility QA data using the "Browse..." button under "Choose facility data file".
      b. Specify the date range for which the data was generated, under "Enter date range".
      c. Click "Generate Reports" to generate the reports from the uploaded file. 
@@ -76,6 +88,6 @@ Steps 2 through 6 need to be executed only once.
      VIII. After the emails have been sent, a message will be shown that says "Sent emails. See 'xyz' for any warnings or errors.". Here 'xyz' is the name of a log file on your computer, that contains any warnings for missing emails or COIIN reports.
   
   
-  7. Stopping the app:
+  11. Stopping the app:
      a. Go back to RStudio.
      b. Locate a hexagonal "STOP" button right above the "Console" pane mentioned in step 2.a and click it. 
