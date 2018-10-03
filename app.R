@@ -109,8 +109,10 @@ showProgSendEmail <- function(send_email) {
       }
       progress$set(value = value, detail = detail)
     }
-    email_message <- sendEmail(email_file$datapath, email_input$emailId, email_input$password,
-                               coiin_dir = coiin_dir_input, updateProgress = updateProgress)
+    email_message <- tryCatch(sendEmail(email_file$datapath, email_input$emailId, email_input$password,
+                               coiin_dir = coiin_dir_input, updateProgress = updateProgress), error = function(c) {
+                                 sprintf("Sending emails failed. Please check the 'from' email and password. The error was- %s", conditionMessage(c))
+              })
     # email_message <- sendEmail(email_file$datapath, email_input$emailId, email_input$password,
     #                            coiin_files = email_input$fileIn, updateProgress = updateProgress)
     if (render_email_text) {

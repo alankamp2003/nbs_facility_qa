@@ -137,8 +137,7 @@ sendEmail <- function(email_file, from_email, password, coiin_dir = NULL, update
   if (!file.exists(properties_file))
     return(sprintf("File containing email subject and body not found. It must be under %s and called '%s'", normalizePath(getwd()), properties_file))
   props <- read.properties(properties_file)
-  #print(props$subject)
-  #print(props$body)
+  is_first_email <- TRUE
   for (i in 1:length(quality_files)) {
     id <- getId(quality_files, i, "_qa")
     fac_emails <- filter(all_emails, `Facility ID` == id) %>% select(Email)
@@ -176,15 +175,39 @@ sendEmail <- function(email_file, from_email, password, coiin_dir = NULL, update
         flog.warn("No COIIN report found for facility id %s", id)
         add_coiin_warn <- FALSE
       }
-      send.mail(from = from_email,
-                to = c(fac_emails[j]),
-                subject = props$subject,
-                body = paste(props$line1, props$line2, props$line3, props$line4, sep = "\n\n"),
-                smtp = list(host.name = server, port = out_port, user.name = user_name,
-                            passwd = password, ssl = ssl_arg, tls = tls_arg),
-                authenticate = TRUE,
-                attach.files = attach_files,
-                send = TRUE)
+      # if it's the first email to be sent and there's an error, it's assumed to be because the 'from' email and/or password
+      # (credentials) are wrong; that's why trycatch isn't used in that case; this makes sure that the error gets caught
+      # in the front-end and is shown to the user; it also stops the process of sending emails, which is most likely
+      # the desired behavior, because if the credentials are wrong, no emails will get sent anyway; if it's not the first
+      # email and there's an error, just log the error using trycatch and move on to the next email address because the 
+      # credentials should be correct and the error is most likely with that email address
+      to_email = c(fac_emails[j])
+      args_list = list(host.name = server, port = out_port, user.name = user_name,
+                       passwd = password, ssl = ssl_arg, tls = tls_arg)
+      email_subject = props$subject
+      email_body = paste(props$line1, props$line2, props$line3, props$line4, sep = "\n\n")
+      if (is_first_email) {
+        send.mail(from = from_email,
+                  to = to_email,
+                  subject = email_subject,
+                  body = email_body,
+                  smtp = args_list,
+                  authenticate = TRUE,
+                  attach.files = attach_files,
+                  send = TRUE)
+      } else {
+        tryCatch(send.mail(from = from_email,
+                           to = to_email,
+                           subject = email_subject,
+                           body = email_body,
+                           smtp = args_list,
+                           authenticate = TRUE,
+                           attach.files = attach_files,
+                           send = TRUE), error = function(c) {
+                             flog.error("Sending email failed for facility id %s and email %s. The error was- %s", id, to_email, conditionMessage(c))
+                           })
+      }
+      is_first_email <- FALSE
     }
     # If we were passed a progress update function, call it
     if (is.function(updateProgress)) {
@@ -262,22 +285,6 @@ sendEmail1 <- function(email_file, from_email, password, coiin_files = NULL, upd
         flog.warn("No COIIN report found for facility id %s", id)
         add_coiin_warn <- FALSE
       }
-      #       send.mail(from = from_email,
-      #                 to = c(fac_emails[j]),
-      #                 subject = "Newborn Screening Reports",
-      #                 body = "Hello-
-      #                 
-      # Attached are your newborn screening reports.  Contact Ashley Comer by phone 515-725-1525 or email ashley-comer@uiowa.edu with any questions.
-      #                 
-      #                 
-      # Thank you,
-      #                 
-      # Newborn Screening Staff",
-      #                 #smtp = list(host.name = server, port = out_port, user.name = user_name, passwd = password, tls = TRUE)
-      #                 smtp = list(host.name = server, port = out_port, user.name = from_email, passwd = password, tls = TRUE),
-      #                 authenticate = TRUE,
-      #                 attach.files = attach_files,
-      #                 send = TRUE)
     }
     # If we were passed a progress update function, call it
     if (is.function(updateProgress)) {
