@@ -1,0 +1,6 @@
+FROM rocker/rstudio
+USER root
+
+RUN apt-get -y update
+RUN apt-get -y install default-jre-headless
+RUN apt-get -y install r-cran-shiny
