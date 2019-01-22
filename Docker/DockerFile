@@ -7,5 +7,9 @@ RUN apt-get -y install default-jre-headless
 RUN apt-get -y install default-jdk-headless
 RUN apt-get -y install r-cran-shiny
 RUN apt-get -y install r-cran-markdown
+RUN apt-get -y install libxml2-dev
+RUN apt-get -y install texlive
+RUN apt-get -y install xzdec
+RUN chmod 777 /var/lib/texmf
 
-RUN echo "install.packages(c('shinyjs', 'shinyalert','readxl','rmarkdown','dplyr', 'mailR', 'futile.logger', 'properties'))" | R -
+RUN echo "install.packages(c('shinyjs', 'shinyalert','readxl','rmarkdown','dplyr', 'mailR', 'futile.logger', 'properties', 'kableExtra', 'caTools, 'bitops', 'rprojroot'))" | R -
