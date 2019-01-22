@@ -17,7 +17,7 @@ RUN apt-get -y install default-jre-headless default-jdk-headless r-cran-shiny r-
 
 # Allow texmf (markup) to write to this directory in RStudio
 RUN chmod 777 /var/lib/texmf
-RUN echo "install.packages(c('shinyjs', 'shinyalert','readxl','rmarkdown','dplyr', 'mailR', 'futile.logger', 'properties', 'kableExtra', 'caTools', 'bitops', 'rprojroot'))" | R -
+RUN echo "install.packages(c('shinyjs', 'shinyalert','readxl','rmarkdown','dplyr', 'mailR', 'futile.logger', 'properties', 'kableExtra', 'caTools', 'bitops', 'rprojroot', 'png'))" | R -
 
 # Cleanup downloaded packages to reclaim some space so this doesn't take so much
 RUN apt-get -y clean
