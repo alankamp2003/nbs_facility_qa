@@ -51,7 +51,6 @@ ui <- tagList(fluidPage(
       actionButton(inputId = "sendEmails", label = "Send emails")
     ),
     mainPanel(
-      #dataTableOutput("tbl2"),
       tags$h3(textOutput("gen_reports")),
       tags$h3(textOutput("sent_emails"))
     )
@@ -102,10 +101,10 @@ showProgSendEmail <- function(send_email) {
     # - If `value` is NULL, it will move the progress bar 1/5 of the remaining
     #   distance. If non-NULL, it will set the progress to that value.
     # - It also accepts optional detail text.
-    updateProgress <- function(value = NULL, detail = NULL) {
+    updateProgress <- function(value = NULL, detail = NULL, total = 5) {
       if (is.null(value)) {
         value <- progress$getValue()
-        value <- value + (progress$getMax() - value) / 5
+        value <- value + (progress$getMax() - value) / total
       }
       progress$set(value = value, detail = detail)
     }
@@ -113,8 +112,6 @@ showProgSendEmail <- function(send_email) {
                                coiin_dir = coiin_dir_input, updateProgress = updateProgress), error = function(c) {
                                  sprintf("Sending emails failed. Please check the 'from' email and password. The error was- %s", conditionMessage(c))
               })
-    # email_message <- sendEmail(email_file$datapath, email_input$emailId, email_input$password,
-    #                            coiin_files = email_input$fileIn, updateProgress = updateProgress)
     if (render_email_text) {
       email_output$sent_emails <- renderText({
         email_message
@@ -125,7 +122,7 @@ showProgSendEmail <- function(send_email) {
   }
 }
 
-# Define server logic required to draw a histogram
+# Define server logic to update the UI or send emails etc.
 server <- function(input, output, session) {
   reports <- eventReactive(input$genReports, {
     validate(validateFacilityData(input))
@@ -215,9 +212,6 @@ server <- function(input, output, session) {
      input$mydata
    })
    
-   # output$tbl2 <- DT::renderDataTable(
-   #   input$fileIn
-   # )
 }
 
 # Run the application 
