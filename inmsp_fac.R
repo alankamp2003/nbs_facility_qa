@@ -16,7 +16,7 @@ generateReports <- function(excel_file, dateRange, updateProgress = NULL) {
   # replace one or more "."s in each column name with a single "_"
   # rename the columns with new names
   names <- lapply(colnames(df), mygrep)
-  names <- unlist(names)
+  names <- unlist(names)[]
   colnames(df) <- names
   
   # get columns that start with "T_" and ones that don't;
@@ -33,7 +33,7 @@ generateReports <- function(excel_file, dateRange, updateProgress = NULL) {
                        "Applied both sides", "Paper scratched", "Specimen age",
                        "Serum separated", "Contaminated", "Other", "Total Unsatisfactory",
                        "Rate (%) (goal is <1%)", "Unknown weight", "Unknown transfusion",
-                       "Early collection <24 hours [1] ", "Transfused before collection [2]")
+                       "Early collection <24 hours [1]", "Transfused before collection [2]")
   
   # create the output directory if it isn't present; otherwise remove all files in it
   dir_name <- facility_dir
@@ -45,6 +45,8 @@ generateReports <- function(excel_file, dateRange, updateProgress = NULL) {
       file.remove(paste(dir_name,"/",files[i], sep = ""))
     }
   }
+  
+  props <- read.properties(properties_file)
   for (i in 1:nrow(df)) {
   #for (i in 1:4) {
     # generate the output data frame for each facility
@@ -67,7 +69,8 @@ generateReports <- function(excel_file, dateRange, updateProgress = NULL) {
                       output_dir = dir_name,
                       params = list(data = output_df,
                                     heading = paste("Quality Report for ", name, "(", org_id, ")"),
-                                    caption = paste(beg, "through", end)))
+                                    caption = paste(beg, "through", end),
+                                    logo = trimws(props$logo)))
     # If we were passed a progress update function, call it
     if (is.function(updateProgress)) {
       text <- paste0("Facility #", org_id)
@@ -116,13 +119,11 @@ sendEmail <- function(email_file, from_email, password, coiin_dir = NULL, update
     server <- "smtp.gmail.com"
     out_port <- 465
     ssl_arg <- TRUE
-  } else if (domain == "uiowa.edu") {
+  } else {
     server <- "smtp.office365.com"
     out_port <- 587
     user_name <- from_email
     tls_arg <- TRUE
-  } else {
-    return("The email address must have either gmail.com or uiowa.edu")
   }
   all_emails <- read_excel(email_file) %>% arrange(`Facility ID`)
   # go through the directories for quality and coiin reports and send emails to all addresses;
@@ -138,7 +139,8 @@ sendEmail <- function(email_file, from_email, password, coiin_dir = NULL, update
     return(sprintf("File containing email subject and body not found. It must be under %s and called '%s'", normalizePath(getwd()), properties_file))
   props <- read.properties(properties_file)
   is_first_email <- TRUE
-  for (i in 1:length(quality_files)) {
+  len_quality_files = length(quality_files)
+  for (i in 1:len_quality_files) {
     id <- getId(quality_files, i, "_qa")
     fac_emails <- filter(all_emails, `Facility ID` == id) %>% select(Email)
     fac_emails <- fac_emails[[1]]
@@ -212,7 +214,7 @@ sendEmail <- function(email_file, from_email, password, coiin_dir = NULL, update
     # If we were passed a progress update function, call it
     if (is.function(updateProgress)) {
       text <- paste0("Facility #", id)
-      updateProgress(detail = text)
+      updateProgress(detail = text, total = len_quality_files)
     }
   }
   return(sprintf("Sent emails. See %s for any warnings or errors.", normalizePath(properties_file)))
@@ -326,10 +328,3 @@ get_col_vals <- function(sheet_vals) {
   
   return(vals)
 }
-
-#create a data frame from the passed row of the passed data frame
-#getRowDF <- function(full_df, row, fac_cols, tot_cols, output_colnames, output_rownames) {
- 
-  
- # return(output_df)
-#}
